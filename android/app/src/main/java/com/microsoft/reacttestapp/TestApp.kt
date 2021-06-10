@@ -37,7 +37,7 @@ class TestApp : Application(), ReactApplication {
             },
             afterReactNativeInit = {
                 eventConsumers.forEach { it.onTestAppDidInitializeReactNative() }
-            },
+            }
         )
     }
 
