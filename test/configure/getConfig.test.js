@@ -10,8 +10,20 @@ describe("getConfig()", () => {
   const { mockParams } = require("./mockParams");
   const { getConfig } = require("../../scripts/configure");
 
+  /**
+   * Gets the list of dependencies from specified config.
+   * @param {import("../../scripts/configure").Configuration} config
+   * @param {import("../../scripts/configure").ConfigureParams} params
+   * @returns {string[] | undefined}
+   */
+  function getDependencies({ getDependencies }, params) {
+    const dependencies = getDependencies && getDependencies(params);
+    return dependencies && Object.keys(dependencies);
+  }
+
   test("returns common scripts and files", () => {
-    const config = getConfig(mockParams(), "common");
+    const params = mockParams();
+    const config = getConfig(params, "common");
 
     expect(Object.keys(config.files).sort()).toEqual([
       ".watchmanconfig",
@@ -22,11 +34,12 @@ describe("getConfig()", () => {
     ]);
     expect(config.oldFiles).toEqual([]);
     expect(Object.keys(config.scripts).sort()).toEqual(["start"]);
-    expect(Object.keys(config.dependencies)).toEqual([]);
+    expect(getDependencies(config, params)).toEqual([]);
   });
 
   test("returns more common scripts and files when initializing", () => {
-    const config = getConfig(mockParams({ init: true }), "common");
+    const params = mockParams({ init: true });
+    const config = getConfig(params, "common");
 
     expect(Object.keys(config.files).sort()).toEqual([
       ".watchmanconfig",
@@ -41,17 +54,18 @@ describe("getConfig()", () => {
     ]);
     expect(config.oldFiles).toEqual([]);
     expect(Object.keys(config.scripts).sort()).toEqual(["start"]);
-    expect(Object.keys(config.dependencies)).toEqual([]);
+    expect(getDependencies(config, params)).toEqual([]);
   });
 
   test("returns Android specific scripts and additional files", () => {
-    const config = getConfig(mockParams(), "android");
+    const params = mockParams();
+    const config = getConfig(params, "android");
 
     expect(Object.keys(config.scripts).sort()).toEqual([
       "android",
       "build:android",
     ]);
-    expect(Object.keys(config.dependencies)).toEqual([]);
+    expect(getDependencies(config, params)).toEqual([]);
     expect(Object.keys(config.files).sort()).toEqual([
       "build.gradle",
       "gradle.properties",
@@ -65,10 +79,11 @@ describe("getConfig()", () => {
   });
 
   test("returns iOS specific scripts and additional files", () => {
-    const config = getConfig(mockParams(), "ios");
+    const params = mockParams();
+    const config = getConfig(params, "ios");
 
     expect(Object.keys(config.scripts).sort()).toEqual(["build:ios", "ios"]);
-    expect(Object.keys(config.dependencies)).toEqual([]);
+    expect(getDependencies(config, params)).toEqual([]);
     expect(Object.keys(config.files).sort()).toEqual(["Podfile"]);
     expect(config.oldFiles.sort()).toEqual([
       "Podfile.lock",
@@ -79,14 +94,15 @@ describe("getConfig()", () => {
   });
 
   test("returns macOS specific scripts and additional files", () => {
-    const config = getConfig(mockParams(), "macos");
+    const params = mockParams();
+    const config = getConfig(params, "macos");
 
     expect(Object.keys(config.scripts).sort()).toEqual([
       "build:macos",
       "macos",
     ]);
     expect(Object.keys(config.files).sort()).toEqual(["Podfile"]);
-    expect(Object.keys(config.dependencies)).toEqual(["react-native-macos"]);
+    expect(getDependencies(config, params)).toEqual(["react-native-macos"]);
     expect(config.oldFiles.sort()).toEqual([
       "Podfile.lock",
       "Pods",
@@ -96,14 +112,15 @@ describe("getConfig()", () => {
   });
 
   test("returns Windows specific scripts and additional files", () => {
-    const config = getConfig(mockParams(), "windows");
+    const params = mockParams();
+    const config = getConfig(params, "windows");
 
     expect(Object.keys(config.scripts).sort()).toEqual([
       "build:windows",
       "start:windows",
       "windows",
     ]);
-    expect(Object.keys(config.dependencies)).toEqual(["react-native-windows"]);
+    expect(getDependencies(config, params)).toEqual(["react-native-windows"]);
     expect(Object.keys(config.files).sort()).toEqual([]);
     expect(config.oldFiles.sort()).toEqual([
       "Test.sln",
